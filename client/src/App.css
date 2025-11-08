@@ -1,0 +1,92 @@
+.App {
+  min-height: 100vh;
+  background-color: #fafafa;
+}
+
+/* Luxury Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Luxury Color Palette */
+:root {
+  --luxury-gold: #C9A961;
+  --luxury-dark: #1a1a1a;
+  --luxury-light: #fafafa;
+  --luxury-gray: #6c6c6c;
+  --luxury-border: #e5e5e5;
+}
+
+/* Smooth Transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: var(--luxury-dark);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--luxury-gold);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--luxury-dark);
+  border: 1px solid var(--luxury-dark);
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--luxury-dark);
+  color: white;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--luxury-dark);
+  border: 1px solid var(--luxury-border);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--luxury-dark);
+  background-color: var(--luxury-dark);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+}
+
