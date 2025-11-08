@@ -18,11 +18,14 @@ function Cart() {
     fetchCart();
     // Listen for cart updates
     const handleCartUpdate = () => {
-      fetchCart();
+      // Only fetch cart if checkout modal is not showing
+      if (!showCheckout) {
+        fetchCart();
+      }
     };
     window.addEventListener('cartUpdated', handleCartUpdate);
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
-  }, []);
+  }, [showCheckout]);
 
   const fetchCart = async () => {
     try {
@@ -110,7 +113,7 @@ function Cart() {
     );
   }
 
-  if (cart.items.length === 0) {
+  if (cart.items.length === 0 && !showCheckout) {
     return (
       <div className="cart-page">
         <div className="cart-empty">
@@ -212,4 +215,3 @@ function Cart() {
 }
 
 export default Cart;
-

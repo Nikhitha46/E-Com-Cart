@@ -38,7 +38,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
       });
 
       setReceipt(response.data);
-      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      // Don't dispatch cart update here - wait for user to click Continue Shopping
     } catch (err) {
       setError(err.response?.data?.error || 'Checkout failed. Please try again.');
       console.error(err);
@@ -65,9 +65,16 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
     });
   };
 
+  const handleContinueShopping = () => {
+    // Dispatch cart update event now
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
+    // Call onSuccess to close modal and navigate
+    onSuccess();
+  };
+
   if (receipt) {
     return (
-      <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-overlay">
         <div className="modal-content receipt-content" onClick={(e) => e.stopPropagation()}>
           <div className="receipt-header">
             <h2>Order Confirmed</h2>
@@ -109,7 +116,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
             </div>
           </div>
           <div className="receipt-footer">
-            <button className="btn-primary" onClick={onSuccess}>
+            <button className="btn-primary" onClick={handleContinueShopping}>
               Continue Shopping
             </button>
           </div>
@@ -173,4 +180,3 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
 }
 
 export default CheckoutModal;
-
