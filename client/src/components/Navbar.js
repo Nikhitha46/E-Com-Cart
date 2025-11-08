@@ -40,7 +40,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <span className="logo-text">VIBE</span>
+          <span className="logo-text">MAISONÉ</span>
           <span className="logo-subtitle">COMMERCE</span>
         </Link>
         <div className="navbar-menu">

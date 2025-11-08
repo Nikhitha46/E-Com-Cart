@@ -41,7 +41,7 @@ async function updateImages() {
       { name: "Premium Leather Belt" },
       { 
         $set: { 
-          image: "https://images.unsplash.com/photo-1624378515192-85e29842a2a1?w=800&h=1000&fit=crop"
+          image: "https://images.unsplash.com/photo-1664286074240-d7059e004dff?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cHJlbWl1bSUyMGxlYXRoZXIlMjBiZWx0fGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600"
         } 
       }
     );
