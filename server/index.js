@@ -19,7 +19,6 @@ mongoose.connect(MONGODB_URI, {
 })
 .then(() => {
   console.log('MongoDB connected successfully');
-  // Initialize products after connection
   initializeProducts();
 })
 .catch(err => {
@@ -42,8 +41,31 @@ const cartItemSchema = new mongoose.Schema({
   quantity: { type: Number, required: true, min: 1 }
 }, { timestamps: true });
 
+const orderSchema = new mongoose.Schema({
+  orderId: { type: String, required: true, unique: true },
+  customer: {
+    name: { type: String, required: true },
+    email: { type: String, required: true }
+  },
+  items: [{
+    product: {
+      _id: mongoose.Schema.Types.ObjectId,
+      name: String,
+      price: Number,
+      image: String,
+      category: String
+    },
+    quantity: Number,
+    itemTotal: Number
+  }],
+  total: { type: Number, required: true },
+  status: { type: String, default: 'confirmed' },
+  timestamp: { type: Date, default: Date.now }
+}, { timestamps: true });
+
 const Product = mongoose.model('Product', productSchema);
 const CartItem = mongoose.model('CartItem', cartItemSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 // Initialize products if database is empty
 async function initializeProducts() {
@@ -133,13 +155,11 @@ app.post('/api/cart', async (req, res) => {
       return res.status(400).json({ error: 'Invalid productId or quantity' });
     }
 
-    // Check if product exists
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Check if item already in cart
     const existingItem = await CartItem.findOne({ productId });
     
     if (existingItem) {
@@ -195,7 +215,7 @@ app.delete('/api/cart/:id', async (req, res) => {
   }
 });
 
-// PUT /api/cart/:id (update quantity)
+// PUT /api/cart/:id
 app.put('/api/cart/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -230,41 +250,94 @@ app.post('/api/checkout', async (req, res) => {
       return res.status(400).json({ error: 'Name and email are required' });
     }
 
-    // Calculate total
-    let total = 0;
-    if (cartItems && cartItems.length > 0) {
-      for (const item of cartItems) {
-        const product = await Product.findById(item.productId);
-        if (product) {
-          total += product.price * item.quantity;
-        }
-      }
-    } else {
-      // If no cartItems provided, calculate from current cart
-      const cartItemsDb = await CartItem.find().populate('productId');
-      cartItemsDb.forEach(item => {
-        total += item.productId.price * item.quantity;
-      });
+    // Get cart items with product details
+    const cartItemsDb = await CartItem.find().populate('productId');
+    
+    if (cartItemsDb.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
     }
 
-    const receipt = {
-      orderId: `ORD-${Date.now()}`,
+    let total = 0;
+    const orderItems = cartItemsDb.map(item => {
+      const itemTotal = item.productId.price * item.quantity;
+      total += itemTotal;
+      return {
+        product: {
+          _id: item.productId._id,
+          name: item.productId.name,
+          price: item.productId.price,
+          image: item.productId.image,
+          category: item.productId.category
+        },
+        quantity: item.quantity,
+        itemTotal: itemTotal
+      };
+    });
+
+    const orderId = `ORD-${Date.now()}`;
+    
+    // Create order in database
+    const order = new Order({
+      orderId: orderId,
       customer: {
-        name,
-        email
+        name: name,
+        email: email
       },
-      items: cartItems || [],
+      items: orderItems,
       total: total,
-      timestamp: new Date().toISOString(),
-      status: 'confirmed'
-    };
+      status: 'confirmed',
+      timestamp: new Date()
+    });
+
+    await order.save();
 
     // Clear cart after checkout
     await CartItem.deleteMany({});
 
-    res.json(receipt);
+    res.json({
+      orderId: order.orderId,
+      customer: order.customer,
+      total: order.total,
+      timestamp: order.timestamp,
+      status: order.status
+    });
   } catch (error) {
     res.status(500).json({ error: 'Checkout failed', message: error.message });
+  }
+});
+
+// GET /api/orders/:email - Get orders by email
+app.get('/api/orders/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const orders = await Order.find({ 'customer.email': email })
+      .sort({ timestamp: -1 });
+    
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch orders', message: error.message });
+  }
+});
+
+// GET /api/orders/detail/:orderId - Get specific order details
+app.get('/api/orders/detail/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await Order.findOne({ orderId: orderId });
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch order', message: error.message });
   }
 });
 
@@ -272,4 +345,3 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`API endpoints available at http://localhost:${PORT}/api`);
 });
-

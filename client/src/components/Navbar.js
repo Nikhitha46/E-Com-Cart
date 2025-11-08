@@ -51,6 +51,7 @@ function Navbar() {
               <span className="cart-badge">{cartItemCount}</span>
             )}
           </Link>
+          <Link to="/profile" className="navbar-link">Profile</Link>
         </div>
       </div>
     </nav>
